@@ -47,7 +47,8 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-    	
+    	String msg = model.creaGrafo(cmbMatch.getValue());
+    	txtResult.appendText(msg);
     }
 
     @FXML
@@ -73,5 +74,6 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	cmbMatch.getItems().addAll(this.model.getAllMatches());
     }
 }

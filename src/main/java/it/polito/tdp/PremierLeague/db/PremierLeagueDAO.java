@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import it.polito.tdp.PremierLeague.model.Action;
+import it.polito.tdp.PremierLeague.model.Efficenze;
 import it.polito.tdp.PremierLeague.model.Match;
 import it.polito.tdp.PremierLeague.model.Player;
 import it.polito.tdp.PremierLeague.model.Team;
@@ -85,7 +86,7 @@ public class PremierLeagueDAO {
 	public List<Match> listAllMatches(){
 		String sql = "SELECT m.MatchID, m.TeamHomeID, m.TeamAwayID, m.teamHomeFormation, m.teamAwayFormation, m.resultOfTeamHome, m.date, t1.Name, t2.Name   "
 				+ "FROM Matches m, Teams t1, Teams t2 "
-				+ "WHERE m.TeamHomeID = t1.TeamID AND m.TeamAwayID = t2.TeamID";
+				+ "WHERE m.TeamHomeID = t1.TeamID AND m.TeamAwayID = t2.TeamID ORDER BY m.MatchID";
 		List<Match> result = new ArrayList<Match>();
 		Connection conn = DBConnect.getConnection();
 
@@ -111,4 +112,53 @@ public class PremierLeagueDAO {
 		}
 	}
 	
+	public List<Player> listAllPlayersByMatches(int mId){
+		String sql =  "SELECT Players.* "
+				+ "FROM Actions, Players "
+				+ "WHERE Actions.MatchID = ? "
+				+ "AND Actions.PlayerID = Players.PlayerID";
+		List<Player> result = new ArrayList<Player>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, mId);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				Player p = new Player(res.getInt("PlayerID"), res.getString("Name"));
+				result.add(p);
+
+			}
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public List<Efficenze> listAllValueForEfficenze(int mId){
+		String sql =  "SELECT Actions.totalSuccessfulPassesAll, Actions.assists, Actions.timePlayed, Players.PlayerID "
+				+ "FROM Actions, Players "
+				+ "WHERE Actions.MatchID = ? "
+				+ "AND Actions.PlayerID = Players.PlayerID";
+		List<Efficenze> result = new ArrayList<Efficenze>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, mId);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				Efficenze e = new Efficenze(res.getInt("totalSuccessfulPassesAll"), res.getInt("assists"), res.getInt("timePlayed"), res.getString("PlayerID") );
+				result.add(e);
+
+			}
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }
